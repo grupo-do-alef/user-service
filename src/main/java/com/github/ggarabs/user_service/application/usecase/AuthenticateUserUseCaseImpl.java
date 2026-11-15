@@ -1,5 +1,9 @@
 package com.github.ggarabs.user_service.application.usecase;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.github.ggarabs.user_service.application.exception.InvalidCredentialsException;
 import com.github.ggarabs.user_service.domain.model.User;
 import com.github.ggarabs.user_service.port.in.AuthenticateUserCommand;
 import com.github.ggarabs.user_service.port.in.AuthenticateUserUseCase;
@@ -11,6 +15,7 @@ public class AuthenticateUserUseCaseImpl implements AuthenticateUserUseCase {
     private final UserRepositoryPort userRepositoryPort;
     private final PasswordEncoderPort passwordEncoderPort;
     private final TokenProviderPort tokenProviderPort;
+    private static final Logger logger = LoggerFactory.getLogger(AuthenticateUserUseCaseImpl.class);
 
     public AuthenticateUserUseCaseImpl(UserRepositoryPort userRepositoryPort,
             PasswordEncoderPort passwordEncoderPort,
@@ -23,10 +28,14 @@ public class AuthenticateUserUseCaseImpl implements AuthenticateUserUseCase {
     @Override
     public String authenticate(AuthenticateUserCommand command) {
         User user = userRepositoryPort.findByEmail(command.email())
-                .orElseThrow(() -> new RuntimeException("Invalid credentials"));
+                .orElseThrow(() -> {
+                    logger.warn("Tentativa de login falhou para o e-mail: {}", command.email());
+                    return new InvalidCredentialsException("Invalid credentials");
+                });
 
         if (!passwordEncoderPort.matches(command.password(), user.getPassword())) {
-            throw new RuntimeException("Invalid credentials");
+            logger.warn("Tentativa de login falhou para o e-mail: {}", command.email());
+            throw new InvalidCredentialsException("Invalid credentials");
         }
 
         return tokenProviderPort.generateToken(user);
