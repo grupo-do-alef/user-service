@@ -29,11 +29,12 @@ public class User {
         this.roles = roles;
     }
 
-    public User(UUID id, String name, String email, String password) {
+    public User(UUID id, String name, String email, String password, Set<Role> roles) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.password = password;
+        this.roles = roles;
     }
 
     public UUID getId() {

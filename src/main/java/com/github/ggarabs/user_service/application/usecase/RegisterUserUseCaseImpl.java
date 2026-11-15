@@ -1,11 +1,15 @@
 package com.github.ggarabs.user_service.application.usecase;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.stereotype.Service;
 
 import com.github.ggarabs.user_service.application.exception.EmailAlreadyExistsException;
+import com.github.ggarabs.user_service.domain.model.Role;
 import com.github.ggarabs.user_service.domain.model.User;
 import com.github.ggarabs.user_service.infra.rest.dto.UserResponse;
 import com.github.ggarabs.user_service.port.in.RegisterUserCommand;
@@ -33,7 +37,11 @@ public class RegisterUserUseCaseImpl implements RegisterUserUseCase {
 
         String encodedPassword = passwordEncoderPort.encode(command.password());
 
-        User newUser = new User(null, command.name(), command.email(), encodedPassword);
+        Set<Role> domainRoles = command.roles().stream()
+                .map(r -> Role.valueOf(r.toUpperCase()))
+                .collect(Collectors.toSet());
+
+        User newUser = new User(null, command.name(), command.email(), encodedPassword, domainRoles);
         User savedUser = userRepositoryPort.save(newUser);
 
         return new UserResponse(savedUser.getId(), savedUser.getName(), savedUser.getEmail());
