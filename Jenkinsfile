@@ -9,10 +9,15 @@ pipeline {
         AWS_DEFAULT_REGION = 'us-east-1'
         AWS_PAGER = ''
         AWS_PROFILE = 'lab'
-        SOURCE_DIR = '/workspace/user-service'
     }
 
     stages {
+        stage('Obter código da main') {
+            steps {
+                sh 'rm -rf "$WORKSPACE/source" && git clone --depth 1 --branch main https://github.com/grupo-do-alef/user-service.git "$WORKSPACE/source"'
+            }
+        }
+
         stage('Validar acesso AWS') {
             steps {
                 sh 'aws sts get-caller-identity'
@@ -21,7 +26,7 @@ pipeline {
 
         stage('Compilar e testar') {
             steps {
-                sh '/workspace/jenkins/scripts/maven-verify.sh user-service "$SOURCE_DIR"'
+                sh 'bash /workspace/jenkins/scripts/maven-verify.sh user-service "$WORKSPACE/source"'
             }
         }
 
@@ -36,7 +41,7 @@ pipeline {
             when { expression { params.DEPLOY_TO_AWS } }
             steps {
                 sshagent(credentials: ['ec2-deploy-key']) {
-                    sh '. ./.ec2.env && cd "$SOURCE_DIR" && /workspace/jenkins/scripts/deploy-compose.sh user-service "$PUBLIC_IP" "http://localhost:3000"'
+                    sh '. ./.ec2.env && cd "$WORKSPACE/source" && /workspace/jenkins/scripts/deploy-compose.sh user-service "$PUBLIC_IP" "http://localhost:3000"'
                 }
             }
         }
