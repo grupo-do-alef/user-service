@@ -1,0 +1,39 @@
+name: CI/CD com Jenkins
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  testar-e-publicar:
+    runs-on: ubuntu-latest
+    env:
+      JENKINS_URL: ${{ secrets.JENKINS_URL }}
+      JENKINS_USER: ${{ secrets.JENKINS_USER }}
+      JENKINS_API_TOKEN: ${{ secrets.JENKINS_API_TOKEN }}
+      JENKINS_JOB: user-service-ci-cd
+    steps:
+      - name: Testar no Jenkins e publicar se aprovado
+        run: |
+          set -euo pipefail
+          trigger() {
+            local deploy="$1" headers queue_id build result building
+            headers="$(mktemp)"
+            curl --fail --silent --show-error --user "$JENKINS_USER:$JENKINS_API_TOKEN" \
+              --data "DEPLOY_TO_AWS=$deploy" --dump-header "$headers" --output /dev/null \
+              "$JENKINS_URL/job/$JENKINS_JOB/buildWithParameters"
+            queue_id="$(awk 'BEGIN { IGNORECASE = 1 } /^Location:/ { print $2 }' "$headers" | tr -d '\r' | sed 's#/$##; s#.*/##' | tail -n 1)"
+            rm -f "$headers"
+            test -n "$queue_id"
+            until build="$(curl --globoff --fail --silent --show-error --user "$JENKINS_USER:$JENKINS_API_TOKEN" "$JENKINS_URL/queue/item/$queue_id/api/json" | jq -r '.executable.number // empty')" && test -n "$build"; do sleep 5; done
+            until building="$(curl --fail --silent --show-error --user "$JENKINS_USER:$JENKINS_API_TOKEN" "$JENKINS_URL/job/$JENKINS_JOB/$build/api/json" | jq -r '.building')" && test "$building" = false; do sleep 10; done
+            result="$(curl --fail --silent --show-error --user "$JENKINS_USER:$JENKINS_API_TOKEN" "$JENKINS_URL/job/$JENKINS_JOB/$build/api/json" | jq -r '.result')"
+            echo "Jenkins build #$build: $result"
+            test "$result" = SUCCESS
+          }
+          trigger false
+          trigger true
