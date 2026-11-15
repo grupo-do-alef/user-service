@@ -4,6 +4,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -34,7 +36,8 @@ class AuthIntegrationTest {
                 RegisterUserCommand command = new RegisterUserCommand(
                                 "Gustavo Integration",
                                 "gustavo.integration@email.com",
-                                "password123");
+                                "password123",
+                                List.of("WORKER"));
 
                 mockMvc.perform(post("/api/register")
                                 .contentType(MediaType.APPLICATION_JSON)
@@ -49,7 +52,8 @@ class AuthIntegrationTest {
                 RegisterUserCommand command = new RegisterUserCommand(
                                 "Duplicado",
                                 "duplicado@email.com",
-                                "password123");
+                                "password123",
+                                List.of("EMPLOYER"));
 
                 mockMvc.perform(post("/api/register")
                                 .contentType(MediaType.APPLICATION_JSON)
