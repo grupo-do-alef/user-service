@@ -14,6 +14,7 @@ pipeline {
 
     stages {
         stage('Validar acesso AWS') {
+            when { expression { params.DEPLOY_TO_AWS } }
             steps {
                 sh 'aws sts get-caller-identity'
             }
