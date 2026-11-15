@@ -9,10 +9,16 @@ pipeline {
         AWS_DEFAULT_REGION = 'us-east-1'
         AWS_PAGER = ''
         AWS_PROFILE = 'lab'
-        SOURCE_DIR = '/workspace/user-service'
+        SOURCE_DIR = "${WORKSPACE}/source"
     }
 
     stages {
+        stage('Obter código da main') {
+            steps {
+                sh '/workspace/jenkins/scripts/checkout-main.sh https://github.com/grupo-do-alef/user-service.git "$SOURCE_DIR"'
+            }
+        }
+
         stage('Validar acesso AWS') {
             when { expression { params.DEPLOY_TO_AWS } }
             steps {
