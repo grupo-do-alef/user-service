@@ -1,8 +1,12 @@
 package com.github.ggarabs.user_service.application.usecase;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.ggarabs.user_service.adapter.in.AuthController.LoginResponse;
 import com.github.ggarabs.user_service.application.exception.InvalidCredentialsException;
 import com.github.ggarabs.user_service.domain.model.User;
 import com.github.ggarabs.user_service.port.in.AuthenticateUserCommand;
@@ -26,7 +30,7 @@ public class AuthenticateUserUseCaseImpl implements AuthenticateUserUseCase {
     }
 
     @Override
-    public String authenticate(AuthenticateUserCommand command) {
+    public LoginResponse authenticate(AuthenticateUserCommand command) {
         User user = userRepositoryPort.findByEmail(command.email())
                 .orElseThrow(() -> {
                     logger.warn("Tentativa de login falhou para o e-mail: {}", command.email());
@@ -38,6 +42,12 @@ public class AuthenticateUserUseCaseImpl implements AuthenticateUserUseCase {
             throw new InvalidCredentialsException("Invalid credentials");
         }
 
-        return tokenProviderPort.generateToken(user);
+        String token = tokenProviderPort.generateToken(user);
+
+        List<String> roles = user.getRoles().stream()
+                .map(role -> role.toString().toUpperCase())
+                .collect(Collectors.toList());
+
+        return new LoginResponse(token, user.getEmail(), user.getName(), roles);
     }
 }
