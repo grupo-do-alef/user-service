@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 import com.github.ggarabs.user_service.domain.model.User;
 import com.github.ggarabs.user_service.infra.persistence.SpringDataUserRepository;
+import com.github.ggarabs.user_service.infra.persistence.UserEntity;
 import com.github.ggarabs.user_service.port.out.UserRepositoryPort;
 
 @Component
@@ -23,5 +24,22 @@ public class UserRepositoryAdapter implements UserRepositoryPort {
     public Optional<User> findByEmail(String email) {
         return springDataUserRepository.findByEmail(email)
                 .map(userMapper::toDomain);
+    }
+
+    @Override
+    public User save(User user) {
+        UserEntity entity = new UserEntity(
+                user.getId(),
+                user.getName(),
+                user.getEmail(),
+                user.getPassword());
+
+        UserEntity savedEntity = springDataUserRepository.save(entity);
+
+        return new User(
+                savedEntity.getId(),
+                savedEntity.getName(),
+                savedEntity.getEmail(),
+                savedEntity.getPassword());
     }
 }
