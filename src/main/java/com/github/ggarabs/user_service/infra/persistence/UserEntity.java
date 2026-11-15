@@ -1,15 +1,16 @@
-package com.github.ggarabs.user_service.adapters.outbound;
+package com.github.ggarabs.user_service.infra.persistence;
 
+import java.util.Set;
 import java.util.UUID;
+
+import com.github.ggarabs.user_service.domain.model.Role;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.EnumType;
 import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,6 +19,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class UserEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -25,18 +27,19 @@ public class UserEntity {
     private String name;
     private String phone;
     private String email;
-    // Armazena somente a senha codificada pelo PasswordEncoder.
     private String password;
     private String birthday;
     private Double latitude;
     private Double longitude;
     private Double preferredRatio;
 
-    @Enumerated(EnumType.STRING)
-    private UserRole role = UserRole.CANDIDATE;
+    private Set<Role> roles;
 
     @PrePersist
     private void setDefaultRole() {
-        if (role == null) role = UserRole.CANDIDATE;
+        if (roles == null || roles.isEmpty()) {
+            roles = Set.of(Role.WORKER);
+        }
     }
+
 }

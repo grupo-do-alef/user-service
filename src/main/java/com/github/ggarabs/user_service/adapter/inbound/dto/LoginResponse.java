@@ -1,4 +1,4 @@
-package com.github.ggarabs.user_service.adapters.inbound.dto;
+package com.github.ggarabs.user_service.adapter.inbound.dto;
 
 import java.util.UUID;
 
