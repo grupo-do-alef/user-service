@@ -1,5 +1,7 @@
 package com.github.ggarabs.user_service.adapter.in;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -18,10 +20,11 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<TokenResponse> login(@RequestBody LoginRequest request) {
-        String token = authenticateUserUseCase.authenticate(
-                new AuthenticateUserCommand(request.email(), request.password()));
-        return ResponseEntity.ok(new TokenResponse(token));
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
+        LoginResponse authenticatedUser = authenticateUserUseCase
+                .authenticate(new AuthenticateUserCommand(request.email(), request.password()));
+
+        return ResponseEntity.ok(authenticatedUser);
     }
 
     @GetMapping("/admin-dashboard")
@@ -33,6 +36,6 @@ public class AuthController {
     public record LoginRequest(String email, String password) {
     }
 
-    public record TokenResponse(String accessToken) {
+    public record LoginResponse(String accessToken, String email, String name, List<String> roles) {
     }
 }
