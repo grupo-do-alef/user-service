@@ -8,8 +8,11 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.github.ggarabs.user_service.application.exception.EmailAlreadyExistsException;
+import com.github.ggarabs.user_service.domain.model.Role;
 import com.github.ggarabs.user_service.domain.model.User;
 import com.github.ggarabs.user_service.port.in.RegisterUserCommand;
 import com.github.ggarabs.user_service.port.out.PasswordEncoderPort;
@@ -40,7 +44,7 @@ class RegisterUserUseCaseTest {
 
     @BeforeEach
     void setUp() {
-        command = new RegisterUserCommand("Gustavo", "gustavo@email.com", "123456");
+        command = new RegisterUserCommand("Gustavo", "gustavo@email.com", "123456", List.of("WORKER", "EMPLOYER"));
     }
 
     @Test
@@ -48,7 +52,11 @@ class RegisterUserUseCaseTest {
         when(userRepositoryPort.findByEmail(command.email())).thenReturn(Optional.empty());
         when(passwordEncoderPort.encode(command.password())).thenReturn("encoded_password");
 
-        User savedUser = new User(UUID.randomUUID(), command.name(), command.email(), "encoded_password");
+        Set<Role> roles = command.roles().stream()
+                .map(r -> Role.valueOf(r.toUpperCase()))
+                .collect(Collectors.toSet());
+
+        User savedUser = new User(UUID.randomUUID(), command.name(), command.email(), "encoded_password", roles);
         when(userRepositoryPort.save(any(User.class))).thenReturn(savedUser);
 
         var response = registerUserUseCase.register(command);
@@ -61,7 +69,11 @@ class RegisterUserUseCaseTest {
 
     @Test
     void shouldThrowExceptionWhenEmailAlreadyExists() {
-        User existingUser = new User(UUID.randomUUID(), "Outro", command.email(), "hash");
+        Set<Role> roles = command.roles().stream()
+                .map(r -> Role.valueOf(r.toUpperCase()))
+                .collect(Collectors.toSet());
+
+        User existingUser = new User(UUID.randomUUID(), "Outro", command.email(), "hash", roles);
         when(userRepositoryPort.findByEmail(command.email())).thenReturn(Optional.of(existingUser));
 
         assertThrows(EmailAlreadyExistsException.class, () -> {

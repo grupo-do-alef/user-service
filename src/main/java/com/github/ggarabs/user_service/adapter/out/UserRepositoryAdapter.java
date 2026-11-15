@@ -32,7 +32,8 @@ public class UserRepositoryAdapter implements UserRepositoryPort {
                 user.getId(),
                 user.getName(),
                 user.getEmail(),
-                user.getPassword());
+                user.getPassword(),
+                user.getRoles());
 
         UserEntity savedEntity = springDataUserRepository.save(entity);
 
@@ -40,6 +41,7 @@ public class UserRepositoryAdapter implements UserRepositoryPort {
                 savedEntity.getId(),
                 savedEntity.getName(),
                 savedEntity.getEmail(),
-                savedEntity.getPassword());
+                savedEntity.getPassword(),
+                savedEntity.getRoles());
     }
 }
