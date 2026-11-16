@@ -3,9 +3,9 @@ package com.github.ggarabs.user_service.adapter.in;
 import java.time.Instant;
 import java.util.UUID;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 import com.github.ggarabs.user_service.infra.persistence.ResumeProfileEntity;
 import com.github.ggarabs.user_service.infra.persistence.ResumeProfileRepository;
 import com.github.ggarabs.user_service.port.out.UserRepositoryPort;
