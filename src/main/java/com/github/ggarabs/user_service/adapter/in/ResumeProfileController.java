@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
-@RequestMapping("/api/users/me/profile")
+@RequestMapping("/users/me/profile")
 public class ResumeProfileController {
     private final ResumeProfileRepository repository;
     private final ObjectMapper objectMapper;

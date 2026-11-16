@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.github.ggarabs.user_service.application.exception.EmailAlreadyExistsException;
 import com.github.ggarabs.user_service.application.exception.InvalidCredentialsException;
@@ -29,6 +30,14 @@ public class GlobalExceptionHandler {
                 "E-mail já cadastrado.");
 
         return ResponseEntity.status(HttpStatus.CONFLICT).body(err);
+    }
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ErrorResponse> handleResponseStatus(ResponseStatusException ex) {
+        String message = ex.getReason() != null ? ex.getReason() : "Não foi possível processar a requisição.";
+        ErrorResponse err = new ErrorResponse(LocalDateTime.now(), message);
+
+        return ResponseEntity.status(ex.getStatusCode()).body(err);
     }
 
     public record ErrorResponse(
