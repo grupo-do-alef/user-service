@@ -1,6 +1,7 @@
 package com.github.ggarabs.user_service.adapter.out;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.stereotype.Component;
 
@@ -18,6 +19,11 @@ public class UserRepositoryAdapter implements UserRepositoryPort {
     public UserRepositoryAdapter(SpringDataUserRepository springDataUserRepository, UserMapper userMapper) {
         this.springDataUserRepository = springDataUserRepository;
         this.userMapper = userMapper;
+    }
+
+    @Override
+    public Optional<User> findById(UUID id) {
+        return springDataUserRepository.findById(id).map(userMapper::toDomain);
     }
 
     @Override
