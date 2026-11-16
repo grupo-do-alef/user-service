@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
+import com.github.ggarabs.user_service.port.out.UserRepositoryPort;
 
 import com.github.ggarabs.user_service.port.in.AuthenticateUserCommand;
 import com.github.ggarabs.user_service.port.in.AuthenticateUserUseCase;
@@ -14,9 +16,18 @@ import com.github.ggarabs.user_service.port.in.AuthenticateUserUseCase;
 public class AuthController {
 
     private final AuthenticateUserUseCase authenticateUserUseCase;
+    private final UserRepositoryPort users;
 
-    public AuthController(AuthenticateUserUseCase authenticateUserUseCase) {
+    public AuthController(AuthenticateUserUseCase authenticateUserUseCase, UserRepositoryPort users) {
         this.authenticateUserUseCase = authenticateUserUseCase;
+        this.users = users;
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<SessionUser> me(Authentication authentication) {
+        var user = users.findByEmail(authentication.getName()).orElseThrow();
+        String role = user.getRoles().stream().findFirst().map(Enum::name).orElse("WORKER");
+        return ResponseEntity.ok(new SessionUser(user.getId().toString(), user.getEmail(), role, "ok"));
     }
 
     @PostMapping("/login")
@@ -38,4 +49,5 @@ public class AuthController {
 
     public record LoginResponse(String accessToken, String email, String name, List<String> roles) {
     }
+    public record SessionUser(String id, String email, String role, String message) { }
 }
