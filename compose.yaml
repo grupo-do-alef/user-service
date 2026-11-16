@@ -7,6 +7,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${DB_NAME:?Defina DB_NAME no .env}
       SPRING_DATASOURCE_USERNAME: ${DB_USER:?Defina DB_USER no .env}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:?Defina DB_PASSWORD no .env}
+      JWT_SECRET: ${JWT_SECRET:?Defina JWT_SECRET no .env}
       SPRING_DOCKER_COMPOSE_ENABLED: "false"
     ports:
       - "${APP_PORT:-8080}:8080"
