@@ -3,7 +3,6 @@ package com.github.ggarabs.user_service.domain.model;
 import java.util.List;
 
 public record Resume(List<Education> education, List<String> skills, List<Experience> experiences) {
-
     public static Resume empty() {
         return new Resume(List.of(), List.of(), List.of());
     }
