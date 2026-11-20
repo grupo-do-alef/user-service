@@ -1,11 +1,14 @@
 pipeline {
     agent any
+    options { disableConcurrentBuilds() }
 
     parameters {
+        string(name: 'SOURCE_REF', defaultValue: 'main', description: 'Branch a validar e publicar.')
         booleanParam(name: 'DEPLOY_TO_AWS', defaultValue: false, description: 'Cria/inicia a EC2 e publica o user-service.')
     }
 
     environment {
+        SOURCE_REF = "${params.SOURCE_REF}"
         AWS_DEFAULT_REGION = 'us-east-1'
         AWS_PAGER = ''
         AWS_PROFILE = 'lab'
