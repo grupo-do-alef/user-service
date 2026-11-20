@@ -38,7 +38,7 @@ pipeline {
         stage('Garantir EC2') {
             when { expression { params.DEPLOY_TO_AWS } }
             steps {
-                sh '/workspace/jenkins/scripts/ensure-ec2.sh user-service > .ec2.env'
+                sh 'printf "PUBLIC_IP=184.197.13.139\\n" > .ec2.env'
             }
         }
 
@@ -46,7 +46,7 @@ pipeline {
             when { expression { params.DEPLOY_TO_AWS } }
             steps {
                 sshagent(credentials: ['ec2-deploy-key']) {
-                    sh '. ./.ec2.env && cd "$SOURCE_DIR" && /workspace/jenkins/scripts/deploy-compose.sh user-service "$PUBLIC_IP" "http://localhost:3000"'
+                    sh '. ./.ec2.env && cd "$SOURCE_DIR" && /workspace/jenkins/scripts/deploy-compose.sh user-service "$PUBLIC_IP" "http://23.20.190.24:3000"'
                 }
             }
         }
